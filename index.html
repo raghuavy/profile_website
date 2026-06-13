@@ -1,87 +1,191 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="no-js">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Avyukt Raghuvanshi</title>
+<script>
+  // Flip to .js immediately so the load reveal only applies when JS is live
+  // (prevents a flash of hidden content if scripts are disabled).
+  document.documentElement.classList.remove("no-js");
+  document.documentElement.classList.add("js");
+</script>
 <style>
   :root {
-    --bg: #fcfcfb;
-    --fg: #16181d;
-    --muted: #6b7280;
-    --faint: #9aa1ab;
-    --accent: #2d4a7c;
-    --rule: #e7e6e2;
+    /* light — drawing ink on warm drafting paper */
+    --table:      #efece4;   /* drafting-table surface (behind the sheet) */
+    --paper:      #faf8f3;   /* the sheet itself */
+    --fg:         #14171c;
+    --muted:      #565d68;
+    --faint:      #8c939d;
+    --accent:     #1f3a6b;   /* blueprint navy */
+    --accent-2:   #34589f;   /* brighter link / hover */
+    --rule:       #e2e0d8;   /* hairlines on the sheet */
+    --frame:      #c9c6bd;   /* sheet border / registration marks */
+    --chip:       rgba(31,58,107,0.05);
+    --grid-fine:  rgba(31,58,107,0.045);
+    --grid-bold:  rgba(31,58,107,0.075);
+    --shadow:     0 1px 2px rgba(20,23,28,0.04), 0 14px 40px -18px rgba(20,23,28,0.22);
+
     --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
     --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #0d0f12;
-      --fg: #e7e9ec;
-      --muted: #9aa1ab;
-      --faint: #6b7280;
-      --accent: #82a7da;
-      --rule: #23262d;
+      --table:      #090b0e;
+      --paper:      #0f1217;
+      --fg:         #e7e9ec;
+      --muted:      #99a0ab;
+      --faint:      #5f6772;
+      --accent:     #7aa2e3;
+      --accent-2:   #a3c4ff;
+      --rule:       #20242c;
+      --frame:      #2b313b;
+      --chip:       rgba(122,162,227,0.07);
+      --grid-fine:  rgba(122,162,227,0.040);
+      --grid-bold:  rgba(122,162,227,0.070);
+      --shadow:     0 0 0 1px rgba(122,162,227,0.04), 0 20px 60px -30px rgba(0,0,0,0.8);
     }
   }
 
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
+
   body {
     margin: 0;
-    background: var(--bg);
     color: var(--fg);
+    background-color: var(--table);
+    /* engineering grid: bold lines every 5th cell over a fine grid */
+    background-image:
+      linear-gradient(var(--grid-bold) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-bold) 1px, transparent 1px),
+      linear-gradient(var(--grid-fine) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-fine) 1px, transparent 1px);
+    background-size: 96px 96px, 96px 96px, 19.2px 19.2px, 19.2px 19.2px;
+    background-position: -1px -1px;
     font-family: var(--sans);
     font-size: 16px;
     line-height: 1.55;
     -webkit-font-smoothing: antialiased;
+    padding: 40px 24px 64px;
   }
-  .wrap {
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 72px 28px 96px;
-  }
-  a { color: var(--accent); text-decoration: none; }
-  a:hover { text-decoration: underline; text-underline-offset: 2px; }
 
-  /* Header */
-  header { margin-bottom: 8px; }
-  h1 {
-    font-size: 2rem;
-    font-weight: 650;
-    letter-spacing: -0.02em;
-    margin: 0 0 6px;
+  a { color: var(--accent-2); text-decoration: none; }
+  a:hover { color: var(--accent-2); }
+  a:focus-visible {
+    outline: 2px solid var(--accent-2);
+    outline-offset: 2px;
+    border-radius: 2px;
   }
-  .tagline { color: var(--muted); margin: 0 0 14px; font-size: 1rem; }
+
+  /* ---- the sheet ---- */
+  .sheet {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+    background: var(--paper);
+    border: 1px solid var(--frame);
+    box-shadow: var(--shadow);
+    padding: 56px 56px 0;
+  }
+
+  /* corner registration marks (crosshairs just inside the sheet edge) */
+  .reg {
+    position: absolute;
+    width: 13px;
+    height: 13px;
+    pointer-events: none;
+    background:
+      linear-gradient(var(--frame), var(--frame)) center/100% 1px no-repeat,
+      linear-gradient(var(--frame), var(--frame)) center/1px 100% no-repeat;
+    opacity: 0.85;
+  }
+  .reg.tl { top: 14px; left: 14px; }
+  .reg.tr { top: 14px; right: 14px; }
+  .reg.bl { bottom: 14px; left: 14px; }
+  .reg.br { bottom: 14px; right: 14px; }
+
+  /* ---- header ---- */
+  header { margin-bottom: 4px; }
+  h1 {
+    font-size: 2.55rem;
+    font-weight: 680;
+    letter-spacing: -0.032em;
+    line-height: 1.02;
+    margin: 0 0 8px;
+  }
+  .tagline {
+    color: var(--muted);
+    margin: 0 0 16px;
+    font-size: 1.02rem;
+    max-width: 60ch;
+  }
   .contact {
     font-family: var(--mono);
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: var(--muted);
     display: flex;
     flex-wrap: wrap;
-    gap: 4px 0;
     align-items: center;
+    row-gap: 4px;
   }
-  .contact .sep { color: var(--faint); margin: 0 10px; }
+  .contact .sep { color: var(--frame); margin: 0 10px; }
 
-  /* Sections */
-  section { margin-top: 44px; }
+  /* ---- sections ---- */
+  main { counter-reset: sheetsec; }
+  section { margin-top: 46px; counter-increment: sheetsec; }
+
   h2 {
+    display: flex;
+    align-items: center;
     font-family: var(--mono);
     font-size: 0.72rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--faint);
-    margin: 0 0 18px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--rule);
+    letter-spacing: 0.16em;
+    color: var(--muted);
+    margin: 0 0 20px;
+  }
+  /* section index — reads like a sheet/zone reference on a drawing */
+  h2::before {
+    content: counter(sheetsec, decimal-leading-zero);
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin-right: 14px;
+    flex-shrink: 0;
+  }
+  /* dimension-line divider: center rule capped by end ticks */
+  h2::after {
+    content: "";
+    flex: 1;
+    height: 7px;
+    margin-left: 14px;
+    background: linear-gradient(var(--rule), var(--rule)) left center/100% 1px no-repeat;
+    border-left: 1px solid var(--rule);
+    border-right: 1px solid var(--rule);
   }
 
-  /* Entries (projects / research / leadership / education) */
-  .entry { margin-bottom: 22px; }
+  /* ---- entries ---- */
+  .entry {
+    position: relative;
+    margin-bottom: 24px;
+    padding-left: 16px;
+  }
   .entry:last-child { margin-bottom: 0; }
+  /* hover tick — a short trace mark in the left margin */
+  .entry::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.5em;
+    width: 7px;
+    height: 1px;
+    background: var(--frame);
+    transition: width 0.18s ease, background-color 0.18s ease;
+  }
+  .entry:hover::before { width: 12px; background: var(--accent); }
+
   .entry-head {
     display: flex;
     justify-content: space-between;
@@ -91,61 +195,91 @@
   .entry-title { font-size: 1rem; font-weight: 600; margin: 0; line-height: 1.4; }
   .entry-title a.repo {
     font-family: var(--mono);
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     font-weight: 500;
     margin-left: 8px;
     white-space: nowrap;
   }
   .entry-date {
     font-family: var(--mono);
-    font-size: 0.76rem;
+    font-size: 0.74rem;
     color: var(--faint);
     white-space: nowrap;
     flex-shrink: 0;
   }
-  .entry-sub { color: var(--muted); font-size: 0.9rem; margin: 2px 0 0; }
-  .entry-bullets { margin: 8px 0 0; padding-left: 18px; }
-  .entry-bullets li { margin: 4px 0; color: var(--fg); }
-  .entry-bullets li::marker { color: var(--faint); }
+  .entry-sub { color: var(--muted); font-size: 0.9rem; margin: 3px 0 0; }
+  .entry-bullets { margin: 9px 0 0; padding-left: 18px; }
+  .entry-bullets li { margin: 5px 0; }
+  .entry-bullets li::marker { color: var(--accent); }
 
-  /* Skills */
+  /* ---- skills (parts-list / BOM style with dotted leaders) ---- */
   .skill-row {
     display: grid;
-    grid-template-columns: 150px 1fr;
-    gap: 12px;
-    padding: 5px 0;
+    grid-template-columns: 152px 1fr;
+    gap: 14px;
+    padding: 6px 0;
     align-items: baseline;
+    border-bottom: 1px dashed var(--rule);
   }
+  .skill-row:last-child { border-bottom: 0; }
   .skill-cat {
     font-family: var(--mono);
-    font-size: 0.76rem;
-    color: var(--muted);
+    font-size: 0.74rem;
+    letter-spacing: 0.02em;
+    color: var(--accent);
   }
   .skill-items { font-size: 0.92rem; }
 
-  /* Honors + publications */
-  .honors { list-style: none; margin: 0 0 20px; padding: 0; }
+  /* ---- honors + publications ---- */
+  .honors { list-style: none; margin: 0 0 22px; padding: 0; }
   .honors li {
     display: inline-block;
-    font-size: 0.85rem;
+    font-family: var(--mono);
+    font-size: 0.74rem;
+    letter-spacing: 0.01em;
+    background: var(--chip);
     border: 1px solid var(--rule);
-    border-radius: 4px;
-    padding: 3px 9px;
-    margin: 0 6px 6px 0;
+    border-radius: 3px;
+    padding: 4px 10px;
+    margin: 0 6px 7px 0;
     color: var(--muted);
   }
   .pubs { list-style: none; margin: 0; padding: 0; }
-  .pubs li { margin-bottom: 12px; padding-left: 14px; position: relative; }
+  .pubs li { margin-bottom: 13px; padding-left: 16px; position: relative; }
   .pubs li::before {
     content: "›";
     position: absolute;
     left: 0;
-    color: var(--faint);
+    top: -0.02em;
+    color: var(--accent);
   }
   .pub-title { display: block; font-size: 0.95rem; }
-  .pub-venue { font-family: var(--mono); font-size: 0.74rem; color: var(--muted); }
+  .pub-venue { font-family: var(--mono); font-size: 0.73rem; color: var(--muted); }
 
-  /* Error / loading */
+  /* ---- title block (engineering-drawing footer) ---- */
+  .titleblock {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 0.7fr 0.7fr;
+    margin: 52px -56px 0;
+    border-top: 1px solid var(--frame);
+    font-family: var(--mono);
+  }
+  .tb-cell {
+    padding: 12px 16px 14px;
+    border-right: 1px solid var(--rule);
+  }
+  .tb-cell:last-child { border-right: 0; }
+  .tb-key {
+    display: block;
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin-bottom: 4px;
+  }
+  .tb-val { font-size: 0.84rem; color: var(--fg); }
+
+  /* ---- error ---- */
   #error {
     display: none;
     font-family: var(--mono);
@@ -155,35 +289,71 @@
     border: 1px solid rgba(180,35,42,0.25);
     border-radius: 6px;
     padding: 14px 16px;
-    margin-top: 24px;
+    margin: 24px 0 40px;
     line-height: 1.5;
   }
 
-  @media (max-width: 540px) {
-    .wrap { padding: 48px 20px 72px; }
-    h1 { font-size: 1.6rem; }
+  /* ---- load reveal (only under .js) ---- */
+  .js .reveal { opacity: 0; transform: translateY(9px); }
+  .js .reveal.is-in {
+    opacity: 1;
+    transform: none;
+    transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .js .reveal { opacity: 1 !important; transform: none !important; }
+    .js .reveal.is-in { transition: none !important; }
+    .entry::before, .entry:hover::before { transition: none !important; }
+  }
+
+  @media (max-width: 620px) {
+    body { padding: 16px 10px 40px; }
+    .sheet { padding: 36px 22px 0; }
+    .reg { display: none; }
+    h1 { font-size: 1.95rem; }
     .entry-head { flex-direction: column; gap: 2px; }
-    .skill-row { grid-template-columns: 1fr; gap: 2px; }
+    .skill-row { grid-template-columns: 1fr; gap: 2px; border-bottom: 1px dashed var(--rule); }
+    .titleblock { grid-template-columns: 1fr 1fr; margin: 40px -22px 0; }
+    .tb-cell:nth-child(2) { border-right: 0; }
+    .tb-cell:nth-child(1), .tb-cell:nth-child(2) { border-bottom: 1px solid var(--rule); }
   }
 
   @media print {
-    :root { --bg: #fff; --fg: #000; }
-    .wrap { padding: 0; max-width: 100%; }
+    :root { --table: #fff; --paper: #fff; --fg: #000; --shadow: none; }
+    body { background: #fff; padding: 0; }
+    .sheet { border: none; box-shadow: none; max-width: 100%; padding: 0; }
+    .reg { display: none; }
     a { color: #000; }
+    .js .reveal { opacity: 1 !important; transform: none !important; }
   }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <header id="profile"></header>
+  <div class="sheet">
+    <span class="reg tl" aria-hidden="true"></span>
+    <span class="reg tr" aria-hidden="true"></span>
+    <span class="reg bl" aria-hidden="true"></span>
+    <span class="reg br" aria-hidden="true"></span>
+
+    <header id="profile" class="reveal"></header>
+
     <main>
-      <section><h2>Education</h2><div id="education"></div></section>
-      <section><h2>Skills</h2><div id="skills"></div></section>
-      <section><h2>Projects</h2><div id="projects"></div></section>
-      <section><h2>Research</h2><div id="research"></div></section>
-      <section><h2>Leadership</h2><div id="leadership"></div></section>
-      <section><h2>Honors &amp; Publications</h2><div id="achievements"></div></section>
+      <section class="reveal"><h2>Education</h2><div id="education"></div></section>
+      <section class="reveal"><h2>Skills</h2><div id="skills"></div></section>
+      <section class="reveal"><h2>Projects</h2><div id="projects"></div></section>
+      <section class="reveal"><h2>Research</h2><div id="research"></div></section>
+      <section class="reveal"><h2>Leadership</h2><div id="leadership"></div></section>
+      <section class="reveal"><h2>Honors &amp; Publications</h2><div id="achievements"></div></section>
     </main>
+
+    <footer class="titleblock reveal" aria-hidden="true">
+      <div class="tb-cell"><span class="tb-key">Drawn by</span><span class="tb-val" id="tb-name">—</span></div>
+      <div class="tb-cell"><span class="tb-key">Title</span><span class="tb-val">Curriculum Vitae</span></div>
+      <div class="tb-cell"><span class="tb-key">Sheet</span><span class="tb-val">1 of 1</span></div>
+      <div class="tb-cell"><span class="tb-key">Issued</span><span class="tb-val" id="tb-date">—</span></div>
+    </footer>
+
     <p id="error"></p>
   </div>
 
@@ -277,7 +447,11 @@
     el.innerHTML = "<h1>" + esc(p.name) + "</h1>"
       + (p.tagline ? '<p class="tagline">' + esc(p.tagline) + "</p>" : "")
       + '<nav class="contact">' + parts.join('<span class="sep">·</span>') + "</nav>";
-    if (p.name) document.title = p.name;
+    if (p.name) {
+      document.title = p.name;
+      const tb = document.getElementById("tb-name");
+      if (tb) tb.textContent = p.name;
+    }
   }
 
   function renderAchievements(rows, el) {
@@ -295,8 +469,20 @@
     el.innerHTML = html;
   }
 
+  // Staggered load reveal (no-op visual under reduced motion thanks to CSS).
+  function revealAll() {
+    const items = document.querySelectorAll(".reveal");
+    items.forEach((node, idx) => {
+      node.style.transitionDelay = (idx * 70) + "ms";
+      requestAnimationFrame(() => node.classList.add("is-in"));
+    });
+  }
+
   // --- Boot ---
   (async function init() {
+    const d = document.getElementById("tb-date");
+    if (d) d.textContent = new Date().toISOString().slice(0, 10);
+
     try {
       const [profile, education, skills, projects, research, leadership, achievements] =
         await Promise.all([
@@ -322,6 +508,8 @@
         + ". If you opened index.html directly (file://), the browser blocks local fetches. "
         + "Run a local server from this folder: python3 -m http.server  →  http://localhost:8000  "
         + "(or just push to GitHub Pages, where it works automatically).";
+    } finally {
+      revealAll();
     }
   })();
 </script>
