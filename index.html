@@ -248,13 +248,18 @@
 
   /* error fallback */
   .errbox { padding: 70px 20px; display: flex; justify-content: center; }
-  .errwin { max-width: 560px; width: 100%; background: var(--mantle);
+  .errwin { max-width: 620px; width: 100%; background: var(--mantle);
     border: 3px solid var(--red); box-shadow: 6px 6px 0 var(--crust); padding: 22px; }
   .errwin .errhead { font-family: var(--disp); font-size: 0.8rem; color: var(--red);
     text-shadow: 2px 2px 0 var(--crust); margin-bottom: 16px; }
   .errwin p { font-size: 1.2rem; margin: 0 0 10px; color: var(--text); }
-  .errwin p.dim { color: var(--subtext0); }
-  .errwin #errmsg { color: var(--peach); }
+  .errwin p.dim { color: var(--subtext0); font-size: 1.1rem; }
+  .errwin #errmsg { color: var(--peach); font-size: 1.15rem; background: var(--crust); padding: 10px 12px; display: block; margin: 8px 0 14px; word-break: break-all; }
+  .errwin .errlist { list-style: none; margin: 8px 0 14px; padding: 0; }
+  .errwin .errlist li { font-family: var(--body); font-size: 1.1rem; color: var(--green);
+    background: var(--crust); padding: 6px 10px; margin-bottom: 4px; }
+  .errwin .errlist li.fail { color: var(--red); }
+  .errwin .errlist li.ok { color: var(--green); }
   .errwin pre { font-family: var(--body); font-size: 1.1rem; color: var(--green);
     background: var(--crust); padding: 10px 12px; margin: 8px 0 14px; overflow-x: auto; }
 
@@ -390,12 +395,20 @@
   <!-- ===== error fallback ===== -->
   <div id="err" class="errbox" hidden>
     <div class="errwin">
-      <div class="errhead">! SYSTEM ERROR</div>
-      <p>Could not load save data (CSV files).</p>
-      <p id="errmsg"></p>
-      <p class="dim">If you opened index.html directly (file://), the browser blocks local file reads. Run a local server from this folder:</p>
-      <pre>python3 -m http.server  &#8594;  http://localhost:8000</pre>
-      <p class="dim">&hellip; or push to GitHub Pages, where it just works.</p>
+      <div class="errhead">! LOAD ERROR</div>
+      <p>Failed to load one or more CSV files.</p>
+      <p><strong id="errmsg"></strong></p>
+      <p class="dim">CSV file status:</p>
+      <ul class="errlist" id="errlist"></ul>
+      <p class="dim">Make sure all 7 CSV files are committed and pushed to your repo root alongside index.html:</p>
+      <pre>profile.csv
+education.csv
+skills.csv
+projects.csv
+research.csv
+leadership.csv
+achievements.csv</pre>
+      <p class="dim">GitHub Pages can take ~1 minute to deploy after a push. Check the Actions tab to confirm the deploy finished.</p>
     </div>
   </div>
 
@@ -590,11 +603,19 @@
         return o;
       });
   }
+
+  /* Load a CSV, returning {data, file, ok, status} — never throws */
   function loadCSV(path) {
-    return fetch(path, { cache: "no-cache" }).then(function (res) {
-      if (!res.ok) throw new Error(path + " (" + res.status + ")");
-      return res.text();
-    }).then(function (t) { return toObjects(parseCSV(t)); });
+    return fetch(path, { cache: "no-cache" })
+      .then(function (res) {
+        if (!res.ok) return { data: [], file: path, ok: false, status: res.status };
+        return res.text().then(function (t) {
+          return { data: toObjects(parseCSV(t)), file: path, ok: true, status: res.status };
+        });
+      })
+      .catch(function (e) {
+        return { data: [], file: path, ok: false, status: e.message || "network error" };
+      });
   }
 
   /* ---------- helpers ---------- */
@@ -729,7 +750,7 @@
     blip(off ? 300 : 520, 0.05);
   });
 
-  /* blips + toast via delegation (covers dynamically rendered nodes) */
+  /* blips + toast via delegation */
   var hoverLast = null;
   document.addEventListener("click", function (e) {
     if (e.target.closest(".hud nav a, .btn, .cart .foot a, .publog a")) blip(560, 0.05);
@@ -795,28 +816,58 @@
     setTimeout(function () { if (!dismissed) dismiss(); }, 12000);
   }
 
-  /* ---------- boot: load + render ---------- */
-  Promise.all([
-    loadCSV("profile.csv"), loadCSV("education.csv"), loadCSV("skills.csv"),
-    loadCSV("projects.csv"), loadCSV("research.csv"), loadCSV("leadership.csv"),
-    loadCSV("achievements.csv")
-  ]).then(function (data) {
-    var profile = data[0], education = data[1], skills = data[2],
-        projects = data[3], research = data[4], leadership = data[5], achievements = data[6];
-    renderProfile(profile);
-    renderPlayer(profile, education);
-    renderCards("quests-grid", projects, "project");
-    renderCards("lab-grid", research, "research");
-    renderCards("guild-grid", leadership, "leadership");
-    renderInventory(skills);
-    renderTrophies(achievements);
-    renderSave(profile);
-    makeStars();
-  }).catch(function (err) {
-    $("app").style.display = "none";
-    $("err").hidden = false;
-    $("errmsg").textContent = String((err && err.message) || err);
-  });
+  /* ---------- load + render ---------- */
+  var CSV_FILES = [
+    { key: "profile",      path: "profile.csv" },
+    { key: "education",    path: "education.csv" },
+    { key: "skills",       path: "skills.csv" },
+    { key: "projects",     path: "projects.csv" },
+    { key: "research",     path: "research.csv" },
+    { key: "leadership",   path: "leadership.csv" },
+    { key: "achievements", path: "achievements.csv" }
+  ];
+
+  Promise.all(CSV_FILES.map(function (f) { return loadCSV(f.path); }))
+    .then(function (results) {
+      var failed = results.filter(function (r) { return !r.ok; });
+
+      if (failed.length) {
+        /* Show the error panel with per-file status */
+        $("app").style.display = "none";
+        $("err").hidden = false;
+
+        var firstFail = failed[0];
+        $("errmsg").textContent = firstFail.file + " — HTTP " + firstFail.status;
+
+        var listHTML = results.map(function (r) {
+          return '<li class="' + (r.ok ? "ok" : "fail") + '">' +
+            (r.ok ? "&#10003;" : "&#10007;") + " " + esc(r.file) +
+            (r.ok ? "" : " (HTTP " + esc(String(r.status)) + ")") +
+            "</li>";
+        }).join("");
+        $("errlist").innerHTML = listHTML;
+        return;
+      }
+
+      /* All good — render everything */
+      var profile     = results[0].data;
+      var education   = results[1].data;
+      var skills      = results[2].data;
+      var projects    = results[3].data;
+      var research    = results[4].data;
+      var leadership  = results[5].data;
+      var achievements = results[6].data;
+
+      renderProfile(profile);
+      renderPlayer(profile, education);
+      renderCards("quests-grid", projects, "project");
+      renderCards("lab-grid", research, "research");
+      renderCards("guild-grid", leadership, "leadership");
+      renderInventory(skills);
+      renderTrophies(achievements);
+      renderSave(profile);
+      makeStars();
+    });
 })();
 </script>
 </body>
