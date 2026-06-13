@@ -1,0 +1,4 @@
+title,subtitle,date,link,bullets
+"Neuromorphic Computing Researcher","Prof. Vlad Pribiag · University of Minnesota","Jan 2026 – Present","","Simulated physics-based neuromorphic 4-Tunnel Josephson Junction circuits in PyTorch; operated dilution refrigerator (mK base temperatures) via QCoDeS and Lakeshore 372"
+"ML for Signal Processing","Prof. Michael Coughlin · LIGO Scientific Collaboration","Jan 2024 – Present","","Built low-latency ML classifier; achieved AUC 0.94 and 88% accuracy; published in PASP; first-author paper in preparation"
+"Physics-Informed ML for Neutrino Energy Estimation","DUNE & NOvA Collaborations","May 2025 – Present","","Contributing author on composite loss function framework for neutrino energy reconstruction; paper in preparation"

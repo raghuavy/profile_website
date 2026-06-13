@@ -1,0 +1,5 @@
+category,items
+Languages,"Verilog, SystemVerilog, C/C++, Python, MATLAB, Bash"
+Tools,"Cadence Innovus, Virtuoso, Synopsys DC, VCS, Vivado, HLS, HSPICE, LTspice, Altium, SolidWorks"
+Protocols / MCUs,"SPI, I2C, UART, JTAG, CAN, LoRa, STM32, PIC24, ATmega"
+ML,"PyTorch, TensorFlow, Scikit-learn"
